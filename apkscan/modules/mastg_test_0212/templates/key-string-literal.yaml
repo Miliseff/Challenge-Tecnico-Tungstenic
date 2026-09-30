@@ -1,0 +1,26 @@
+id: mastg-0212-key-string-literal
+
+info:
+  name: String literal con largo de clave convertido a bytes y usado en SecretKeySpec
+  author: apkscan
+  severity: high
+  description: El archivo convierte con getBytes() un literal de 8, 16, 24 o 32 caracteres (largos tipicos de clave DES, AES y 3DES) y tambien crea una SecretKeySpec.
+  tags: android,crypto,mastg-test-0212
+
+file:
+  - extensions:
+      - java
+      - kt
+    matchers-condition: and
+    matchers:
+      - type: regex
+        regex:
+          - '"(?:[^"\\\s]{8}|[^"\\\s]{16}|[^"\\\s]{24}|[^"\\\s]{32})"\.getBytes\([^)]*\)'
+      - type: regex
+        regex:
+          - 'new\s+SecretKeySpec\('
+    extractors:
+      - type: regex
+        regex:
+          - '[^\n]*"(?:[^"\\\s]{8}|[^"\\\s]{16}|[^"\\\s]{24}|[^"\\\s]{32})"\.getBytes\([^)]*\)[^\n]*'
+          - 'new\s+SecretKeySpec\([^;]*;'

@@ -1,0 +1,30 @@
+id: MASTG-TEST-0291
+title: Ausencia de proteccion contra captura de pantalla (FLAG_SECURE)
+maswe: MASWE-0038
+masvs: MASVS-PLATFORM
+severity: medium
+mode: absence
+description: |
+  Este test funciona al reves que los demas: el hallazgo es que NO hay evidencia. Busca
+  referencias a las APIs que evitan la captura de pantalla, principalmente FLAG_SECURE aplicado
+  con Window.addFlags() o Window.setFlags() (jadx lo muestra como 8192 o 0x2000), y
+  setRecentsScreenshotEnabled(false) para la vista de apps recientes. Si no aparece ninguna,
+  las pantallas de la app se pueden capturar, grabar o espejar. Tambien se buscan llamadas que
+  quitan la proteccion (clearFlags).
+impact: |
+  Sin FLAG_SECURE, el sistema permite capturar la pantalla y mostrar su contenido en
+  pantallas no seguras (screen sharing, Chromecast, apps de grabacion). Ademas, Android guarda
+  una miniatura de la app en la lista de recientes. Datos sensibles como saldos, credenciales
+  o informacion personal pueden filtrarse por capturas, malware con permisos de grabacion o
+  por alguien que mire los recientes.
+mitigation: |
+  Agregar getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE) en las activities que
+  muestran datos sensibles, antes de setContentView. En Android 13+ se puede complementar con
+  setRecentsScreenshotEnabled(false). Revisar que ningun flujo llame a clearFlags con
+  FLAG_SECURE sin una justificacion.
+validation: |
+  Que no haya referencias alcanza para fallar el test. Si las hay, confirmar manualmente que
+  cubren todas las pantallas con datos sensibles y que ningun camino de codigo quita la bandera.
+references:
+  - https://github.com/OWASP/mastg/blob/master/tests-beta/android/MASVS-PLATFORM/MASTG-TEST-0291.md
+  - https://developer.android.com/security/fraud-prevention/activities#flag_secure

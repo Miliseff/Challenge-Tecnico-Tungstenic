@@ -1,0 +1,26 @@
+id: mastg-0212-key-byte-array
+
+info:
+  name: Arreglo de bytes literal usado para crear una SecretKeySpec
+  author: apkscan
+  severity: high
+  description: El archivo declara un arreglo de 8 o mas bytes constantes y tambien crea una SecretKeySpec.
+  tags: android,crypto,mastg-test-0212
+
+file:
+  - extensions:
+      - java
+      - kt
+    matchers-condition: and
+    matchers:
+      - type: regex
+        regex:
+          - 'byte\[\]\s+\w+\s*=\s*(?:new\s+byte\[\]\s*)?\{\s*(?:(?:\(byte\)\s*)?-?(?:0[xX][0-9a-fA-F]+|\d+)\s*,\s*){7,}(?:\(byte\)\s*)?-?(?:0[xX][0-9a-fA-F]+|\d+)\s*\}'
+      - type: regex
+        regex:
+          - 'new\s+SecretKeySpec\('
+    extractors:
+      - type: regex
+        regex:
+          - 'byte\[\]\s+\w+\s*=\s*(?:new\s+byte\[\]\s*)?\{\s*(?:(?:\(byte\)\s*)?-?(?:0[xX][0-9a-fA-F]+|\d+)\s*,\s*){7,}(?:\(byte\)\s*)?-?(?:0[xX][0-9a-fA-F]+|\d+)\s*\}'
+          - 'new\s+SecretKeySpec\([^;]*;'

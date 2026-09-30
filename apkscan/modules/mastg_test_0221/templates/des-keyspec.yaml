@@ -1,0 +1,21 @@
+id: mastg-0221-des-keyspec
+
+info:
+  name: Uso de DESKeySpec o DESedeKeySpec
+  author: apkscan
+  severity: high
+  description: Las clases DESKeySpec y DESedeKeySpec solo tienen sentido con DES y 3DES.
+  tags: android,crypto,mastg-test-0221
+
+file:
+  - extensions:
+      - java
+      - kt
+    matchers:
+      - type: regex
+        regex:
+          - 'new\s+DES(?:ede)?KeySpec\([^;]*;'
+    extractors:
+      - type: regex
+        regex:
+          - 'new\s+DES(?:ede)?KeySpec\([^;]*;'

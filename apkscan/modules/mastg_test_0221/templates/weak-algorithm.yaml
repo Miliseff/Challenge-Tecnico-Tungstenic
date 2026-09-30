@@ -1,0 +1,21 @@
+id: mastg-0221-weak-algorithm
+
+info:
+  name: Algoritmo simetrico roto en Cipher, KeyGenerator o SecretKeyFactory
+  author: apkscan
+  severity: high
+  description: Busca getInstance con DES, DESede, RC2, RC4, Blowfish o variantes PBE basadas en ellos.
+  tags: android,crypto,mastg-test-0221
+
+file:
+  - extensions:
+      - java
+      - kt
+    matchers:
+      - type: regex
+        regex:
+          - '(?i)(?:Cipher|SecretKeyFactory|KeyGenerator)\.getInstance\(\s*"(?:PBEWith[A-Za-z0-9]*(?:DES|RC2|RC4)[A-Za-z0-9]*|DESede|DES|TripleDES|3DES|RC2|RC4|ARCFOUR|Blowfish)(?:/[A-Za-z0-9]+(?:/[A-Za-z0-9]+)?)?"'
+    extractors:
+      - type: regex
+        regex:
+          - '(?i)(?:Cipher|SecretKeyFactory|KeyGenerator)\.getInstance\(\s*"(?:PBEWith[A-Za-z0-9]*(?:DES|RC2|RC4)[A-Za-z0-9]*|DESede|DES|TripleDES|3DES|RC2|RC4|ARCFOUR|Blowfish)(?:/[A-Za-z0-9]+(?:/[A-Za-z0-9]+)?)?"'

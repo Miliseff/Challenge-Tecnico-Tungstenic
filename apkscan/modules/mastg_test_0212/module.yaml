@@ -1,0 +1,26 @@
+id: MASTG-TEST-0212
+title: Claves criptograficas hardcodeadas en el codigo
+maswe: MASWE-0003
+masvs: MASVS-CRYPTO
+severity: high
+mode: presence
+description: |
+  La app construye una SecretKeySpec a partir de material que esta escrito en el propio codigo:
+  un arreglo de bytes literal, un string literal convertido con getBytes() o una cadena Base64
+  fija. La clave viaja dentro del APK y cualquiera puede extraerla.
+impact: |
+  Cualquiera que descargue el APK y lo decompile obtiene la clave. Con ella puede descifrar los
+  datos protegidos por la app, falsificar firmas o MACs, y la clave no se puede rotar sin
+  publicar una version nueva de la app. La misma clave queda ademas compartida entre todos los
+  usuarios.
+mitigation: |
+  No incluir claves en el codigo ni en los recursos. Generar la clave en el dispositivo con
+  KeyGenerator y guardarla en el Android Keystore, o derivarla de un secreto del usuario
+  (por ejemplo con PBKDF2 o Argon2). Si la clave llega desde un servidor, obtenerla
+  en tiempo de ejecucion por un canal autenticado.
+validation: |
+  Confirmar en cada ubicacion que la clave se usa en un contexto sensible y no, por ejemplo,
+  en un test o en una constante sin valor de seguridad.
+references:
+  - https://github.com/OWASP/mastg/blob/master/tests-beta/android/MASVS-CRYPTO/MASTG-TEST-0212.md
+  - https://developer.android.com/reference/javax/crypto/spec/SecretKeySpec

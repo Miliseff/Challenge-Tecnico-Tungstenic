@@ -1,0 +1,26 @@
+id: MASTG-TEST-0221
+title: Algoritmos de cifrado simetrico rotos
+maswe: MASWE-0007
+masvs: MASVS-CRYPTO
+severity: high
+mode: presence
+description: |
+  La app usa algoritmos de cifrado simetrico que ya no se consideran seguros: DES, 3DES (DESede),
+  RC2, RC4 o Blowfish. Se detectan llamadas a Cipher.getInstance, SecretKeyFactory.getInstance y
+  KeyGenerator.getInstance con esos algoritmos, y el uso de las clases DESKeySpec y DESedeKeySpec.
+impact: |
+  DES tiene una clave de 56 bits que se puede recuperar por fuerza bruta. 3DES y Blowfish usan
+  bloques de 64 bits y son vulnerables a ataques de cumpleanos (Sweet32). RC4 genera un keystream
+  sesgado que permite recuperar el texto plano. Un atacante con acceso a los datos cifrados
+  (almacenamiento local, backups, trafico propio de la app) puede descifrarlos.
+mitigation: |
+  Reemplazar el algoritmo por AES con una clave de 128 bits o mas en un modo autenticado
+  (AES/GCM/NoPadding). Generar las claves con KeyGenerator y guardarlas en el Android Keystore
+  en lugar de manejarlas desde el codigo de la app.
+validation: |
+  Revisar cada ubicacion reportada y confirmar si el algoritmo protege datos sensibles o si se
+  usa solo por compatibilidad con un sistema externo que no es sensible.
+references:
+  - https://github.com/OWASP/mastg/blob/master/tests-beta/android/MASVS-CRYPTO/MASTG-TEST-0221.md
+  - https://developer.android.com/privacy-and-security/risks/broken-cryptographic-algorithm
+  - https://sweet32.info/

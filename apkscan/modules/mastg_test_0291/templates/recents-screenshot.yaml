@@ -1,0 +1,21 @@
+id: mastg-0291-recents-screenshot
+
+info:
+  name: Captura de recientes deshabilitada
+  author: apkscan
+  severity: info
+  description: setRecentsScreenshotEnabled(false) evita la miniatura de la app en la lista de recientes.
+  tags: android,platform,mastg-test-0291,role-protection
+
+file:
+  - extensions:
+      - java
+      - kt
+    matchers:
+      - type: regex
+        regex:
+          - 'setRecentsScreenshotEnabled\(\s*(?:false|z)\s*\)'
+    extractors:
+      - type: regex
+        regex:
+          - '[^\n]*setRecentsScreenshotEnabled\(\s*(?:false|z)\s*\)[^\n]*'

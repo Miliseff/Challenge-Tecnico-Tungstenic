@@ -1,0 +1,23 @@
+id: mastg-0291-flag-secure-set
+
+info:
+  name: FLAG_SECURE aplicado a una ventana
+  author: apkscan
+  severity: info
+  description: Window.addFlags o Window.setFlags con FLAG_SECURE, ya sea por nombre o por su valor numerico (8192 o 0x2000).
+  tags: android,platform,mastg-test-0291,role-protection
+
+file:
+  - extensions:
+      - java
+      - kt
+    matchers:
+      - type: regex
+        regex:
+          - '\.(?:addFlags|setFlags)\(\s*(?:WindowManager\.LayoutParams\.|LayoutParams\.)?FLAG_SECURE\b[^;]*;'
+          - '(?:getWindow\(\)|\b[wW]indow\w*)\s*\.(?:addFlags\(\s*(?:8192|0x2000)\s*\)|setFlags\(\s*(?:8192|0x2000)\s*,\s*(?:8192|0x2000)\s*\))'
+    extractors:
+      - type: regex
+        regex:
+          - '\.(?:addFlags|setFlags)\(\s*(?:WindowManager\.LayoutParams\.|LayoutParams\.)?FLAG_SECURE\b[^;]*;'
+          - '(?:getWindow\(\)|\b[wW]indow\w*)\s*\.(?:addFlags\(\s*(?:8192|0x2000)\s*\)|setFlags\(\s*(?:8192|0x2000)\s*,\s*(?:8192|0x2000)\s*\))'

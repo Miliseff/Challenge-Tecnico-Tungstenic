@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "apkscan"
+version = "0.1.0"
+description = "Analisis estatico de APKs contra tests del OWASP MASTG usando nuclei"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["pyyaml>=6.0"]
+
+[project.scripts]
+apkscan = "apkscan.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["apkscan*"]
+
+[tool.setuptools.package-data]
+apkscan = ["modules/**/*.yaml", "modules/**/*.yml"]

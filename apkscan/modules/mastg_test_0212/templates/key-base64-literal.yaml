@@ -1,0 +1,26 @@
+id: mastg-0212-key-base64-literal
+
+info:
+  name: Cadena Base64 fija decodificada y usada en SecretKeySpec
+  author: apkscan
+  severity: high
+  description: El archivo decodifica un literal Base64 de 16 o mas caracteres y tambien crea una SecretKeySpec.
+  tags: android,crypto,mastg-test-0212
+
+file:
+  - extensions:
+      - java
+      - kt
+    matchers-condition: and
+    matchers:
+      - type: regex
+        regex:
+          - 'Base64\.(?:decode|getDecoder\(\)\s*\.decode)\(\s*"[A-Za-z0-9+/=]{16,}"'
+      - type: regex
+        regex:
+          - 'new\s+SecretKeySpec\('
+    extractors:
+      - type: regex
+        regex:
+          - 'Base64\.(?:decode|getDecoder\(\)\s*\.decode)\(\s*"[A-Za-z0-9+/=]{16,}"[^;]*;'
+          - 'new\s+SecretKeySpec\([^;]*;'

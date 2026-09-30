@@ -1,0 +1,24 @@
+id: MASTG-TEST-0232
+title: Modos de cifrado simetrico rotos (ECB)
+maswe: MASWE-0007
+masvs: MASVS-CRYPTO
+severity: high
+mode: presence
+description: |
+  La app usa el modo ECB en un cifrado simetrico, ya sea de forma explicita
+  (por ejemplo "AES/ECB/PKCS5Padding") o implicita: Cipher.getInstance("AES") usa AES/ECB por
+  defecto en Android. Las transformaciones RSA/ECB/* quedan fuera porque RSA no opera por bloques
+  y ese "ECB" es solo un placeholder de la API.
+impact: |
+  ECB cifra cada bloque por separado, asi que bloques de texto plano iguales producen bloques
+  cifrados iguales. Esto deja ver patrones en los datos, permite reordenar o reemplazar bloques
+  sin que se note y facilita ataques de texto plano conocido o elegido.
+mitigation: |
+  Usar un modo autenticado como AES/GCM/NoPadding con un IV nuevo y aleatorio en cada operacion
+  (12 bytes para GCM). Si hace falta CBC, agregar un MAC (encrypt-then-MAC). Evitar
+  Cipher.getInstance("AES") sin modo explicito.
+validation: |
+  Revisar cada ubicacion y confirmar si el cifrado se aplica sobre datos sensibles.
+references:
+  - https://github.com/OWASP/mastg/blob/master/tests-beta/android/MASVS-CRYPTO/MASTG-TEST-0232.md
+  - https://csrc.nist.gov/pubs/sp/800/38/a/final
