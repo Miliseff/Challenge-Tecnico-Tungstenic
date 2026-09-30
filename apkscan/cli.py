@@ -15,6 +15,10 @@ from .registry import RegistryError, discover, select
 from .reporters import console, jsonout, markdown
 
 
+def id_list(value: str) -> list[str]:
+    return [v for v in value.split(",") if v.strip()]
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="apkscan",
@@ -23,8 +27,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("target", nargs="?", help="archivo .apk o directorio con el codigo decompilado")
     p.add_argument("--md", metavar="ARCHIVO", help="guarda el reporte en markdown")
     p.add_argument("--json", metavar="ARCHIVO", help="guarda el reporte en json")
-    p.add_argument("--only", nargs="+", metavar="TEST", help="corre solo estos modulos (ej: 0221 MASTG-TEST-0212)")
-    p.add_argument("--skip", nargs="+", metavar="TEST", help="excluye estos modulos")
+    p.add_argument("--only", action="extend", type=id_list, metavar="TESTS", help="corre solo estos modulos (ej: 0221,MASTG-TEST-0212)")
+    p.add_argument("--skip", action="extend", type=id_list, metavar="TESTS", help="excluye estos modulos (ej: 0291)")
     p.add_argument("--modules-dir", action="append", type=Path, default=[], help="carpeta con modulos extra")
     p.add_argument("--list-modules", action="store_true", help="lista los modulos disponibles y sale")
     p.add_argument("--workdir", type=Path, default=Path(".apkscan-work"), help="donde se guarda lo decompilado")

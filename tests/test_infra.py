@@ -133,7 +133,7 @@ class Cli(unittest.TestCase):
             self.assertEqual(code, 1)
             self.assertIn("MASTG-TEST-0221", md.read_text(encoding="utf-8"))
             self.assertEqual(json.loads(js.read_text(encoding="utf-8"))["target"], str(FIXTURES / "crypto_bad"))
-            clean = cli.main([str(FIXTURES / "crypto_ok"), "--only", "0212", "0221", "0232", "--no-color"])
+            clean = cli.main(["--only", "0212,0221", "--only", "0232", str(FIXTURES / "crypto_ok"), "--no-color"])
             self.assertEqual(clean, 0)
             self.assertEqual(cli.main([str(FIXTURES / "crypto_ok"), "--no-color"]), 1)
 

@@ -27,7 +27,7 @@ Si los binarios no están en el PATH se pueden pasar con `--nuclei` y `--jadx`, 
 python -m apkscan app.apk
 python -m apkscan app.apk --md reporte.md --json reporte.json
 python -m apkscan ./app-decompilada
-python -m apkscan app.apk --only 0221 0232
+python -m apkscan app.apk --only 0221,0232
 python -m apkscan app.apk --skip 0291
 python -m apkscan --list-modules
 ```
