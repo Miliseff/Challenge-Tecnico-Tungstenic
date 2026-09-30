@@ -14,8 +14,8 @@ file:
     matchers:
       - type: regex
         regex:
-          - 'setRecentsScreenshotEnabled\(\s*(?:false|z)\s*\)'
+          - 'setRecentsScreenshotEnabled\(\s*false\s*\)'
     extractors:
       - type: regex
         regex:
-          - '[^\n]*setRecentsScreenshotEnabled\(\s*(?:false|z)\s*\)[^\n]*'
+          - '[^\n]*setRecentsScreenshotEnabled\(\s*false\s*\)[^\n]*'

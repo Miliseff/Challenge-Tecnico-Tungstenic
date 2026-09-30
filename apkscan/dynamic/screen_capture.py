@@ -36,6 +36,14 @@ def window_has_secure(dump: str, focus: str) -> bool | None:
     return None
 
 
+def focus_matches(name: str, package: str, focus: str) -> bool:
+    if name in focus:
+        return True
+    if name.startswith(package + "."):
+        return focus.endswith("/" + name[len(package):])
+    return False
+
+
 def start_failed(output: str) -> bool:
     return any(token in output for token in START_ERRORS)
 
@@ -55,7 +63,7 @@ class ScreenCaptureProbe:
         sleep(settle)
         dump = adb.window_dump()
         focus = parse_focus(dump)
-        if focus is None or name not in focus:
+        if focus is None or not focus_matches(name, package, focus):
             return DynamicObservation(name, "skipped", f"otra ventana tiene el foco: {focus}")
         secure = window_has_secure(dump, focus)
         blank = png.is_black(adb.screencap())

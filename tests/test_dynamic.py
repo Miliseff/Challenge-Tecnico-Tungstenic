@@ -11,6 +11,7 @@ from apkscan.dynamic.adb import Adb, AdbError
 from apkscan.dynamic.screen_capture import (
     ScreenCaptureProbe,
     flags_include_secure,
+    focus_matches,
     parse_focus,
     window_has_secure,
 )
@@ -95,6 +96,15 @@ class PngDecoding(unittest.TestCase):
     def test_garbage_returns_none(self):
         self.assertIsNone(png.is_black(b"no es un png"))
         self.assertIsNone(png.is_black(png.SIGNATURE + b"\x00\x00"))
+
+
+class FocusMatching(unittest.TestCase):
+    def test_full_and_short_component_names(self):
+        pkg = "com.example.vault"
+        self.assertTrue(focus_matches("com.example.vault.LoginActivity", pkg, f"1a u0 {pkg}/com.example.vault.LoginActivity"))
+        self.assertTrue(focus_matches("com.example.vault.LoginActivity", pkg, f"1a u0 {pkg}/.LoginActivity"))
+        self.assertFalse(focus_matches("com.example.vault.LoginActivity", pkg, f"1a u0 {pkg}/.OtherActivity"))
+        self.assertFalse(focus_matches("com.example.vault.LoginActivity", pkg, "1a u0 StatusBar"))
 
 
 class WindowParsing(unittest.TestCase):

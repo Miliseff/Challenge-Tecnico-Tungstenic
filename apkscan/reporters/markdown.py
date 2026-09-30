@@ -25,9 +25,10 @@ def render(report: Report) -> str:
         "|---|---|---|---|---|",
     ]
     for r in report.results:
+        shown = "ausencia" if r.absence is not None else len(r.evidences)
         out.append(
             f"| {r.module.id} | {r.module.maswe} | {status_label(r)} | "
-            f"{severity_label(r)} | {len(r.evidences)} |"
+            f"{severity_label(r)} | {shown} |"
         )
     for r in report.results:
         out.append("")

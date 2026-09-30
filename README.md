@@ -42,12 +42,16 @@ Por cada test: título, descripción, evidencias, impacto y mitigación. Cada ev
 
 ```
 [VULNERABLE] MASTG-TEST-0221 / MASWE-0007 / MASVS-CRYPTO  (severidad: Alta)
-Evidencias (2):
-  #1 [uso inseguro] sources/com/example/vault/WeakCrypto.java:14
+Titulo: Algoritmos de cifrado simetrico rotos
+...
+Evidencias (6):
+  #2 [uso inseguro] sources/com/example/vault/WeakCrypto.java:14
      regla: Algoritmo simetrico roto en Cipher, KeyGenerator o SecretKeyFactory
-         12 |         DESKeySpec keySpec = new DESKeySpec(raw);
-         13 |         SecretKeyFactory factory = SecretKeyFactory.getInstance("DES");
-       > 14 |         Key key = factory.generateSecret(keySpec);
+          12 |     public final byte[] legacyDes(byte[] data, byte[] raw) throws Exception {
+          13 |         DESKeySpec keySpec = new DESKeySpec(raw);
+     >    14 |         SecretKeyFactory factory = SecretKeyFactory.getInstance("DES");
+          15 |         Key key = factory.generateSecret(keySpec);
+          16 |         Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
 ```
 
 La salida de consola se puede complementar con un reporte en Markdown (`--md`) o JSON (`--json`).
@@ -158,9 +162,12 @@ python -m unittest discover -s tests -t .
 
 Los tests corren contra código de ejemplo en `tests/fixtures` y usan `tests/nuclei_sim.py`, un intérprete mínimo de los templates (matchers y extractors regex) que reemplaza al binario de nuclei. Sirve para probar el pipeline y las regex sin instalar nada, pero no reemplaza una corrida con nuclei real. La parte dinámica se prueba con un adb simulado y PNG generados en el test.
 
+Además validé las regex a mano contra el código decompilado de los demos del MASTG (MASTG-DEMO-0017, 0022, 0023 y 0061) y detectan lo que cada demo documenta: las líneas 24, 26 y 30 en el de claves, los cuatro algoritmos en el de algoritmos rotos, las seis instancias en el de ECB y el `addFlags(8192)` en el de FLAG_SECURE. Esos archivos no están en el repo; se pueden bajar del repositorio del MASTG y correr con `python -m apkscan <directorio>`.
+
 ## Limitaciones
 
 - Analiza código Java/Kotlin. Si el input es un directorio decompilado con apktool (smali), los templates actuales no aplican.
-- Es análisis estático por regex, sin flujo de datos. Las claves hardcodeadas se detectan por patrones conocidos: un arreglo de bytes literal o un string de largo típico de clave en el mismo archivo que una `SecretKeySpec`. Claves armadas en varios pasos o ofuscadas pueden pasar desapercibidas, y algún literal del mismo largo puede dar un falso positivo. Por eso cada reporte incluye una nota de validación manual.
-- nuclei omite por defecto los archivos de más de 1 MB.
+- Es análisis estático por regex, sin flujo de datos. Las claves hardcodeadas se detectan por patrones conocidos: un arreglo de bytes literal o un string de largo típico de clave en el mismo archivo que una `SecretKeySpec`. Claves armadas en varios pasos o ofuscadas pueden pasar desapercibidas, y algún literal del mismo largo puede dar un falso positivo. Además, cuando un archivo tiene un arreglo de bytes literal, se reportan todas las `SecretKeySpec` de ese archivo, aunque alguna se construya con otra clave. Por eso cada reporte incluye una nota de validación manual.
+- nuclei limita por defecto el tamaño de los archivos que procesa. Si aparece un archivo decompilado muy grande sin analizar, hay que subir `max-size` en el bloque `file` del template.
+- Los templates y el parseo de la salida de nuclei se probaron con un simulador, no con el binario real. La primera corrida real es la que confirma que coinciden.
 - La prueba dinámica depende del formato de `dumpsys window`, que varía entre versiones de Android; se contemplan las flags con nombre (`SECURE`) y en hexadecimal. Solo cubre MASTG-TEST-0291.
