@@ -101,6 +101,7 @@ class NucleiParsing(unittest.TestCase):
         self.assertEqual(cmd[0], "nuclei")
         self.assertEqual(cmd.count("-t"), 2)
         self.assertIn("-jsonl", cmd)
+        self.assertIn("-file", cmd)
         self.assertEqual(cmd[cmd.index("-target") + 1], "src")
 
     def test_missing_binary(self):

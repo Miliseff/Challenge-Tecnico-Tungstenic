@@ -2,7 +2,7 @@ id: mastg-0212-key-inline-literal
 
 info:
   name: SecretKeySpec creada directamente con un literal
-  author: apkscan
+  author: miliseff
   severity: high
   description: SecretKeySpec recibe un string con getBytes() o un arreglo de bytes escrito en la misma llamada.
   tags: android,crypto,mastg-test-0212

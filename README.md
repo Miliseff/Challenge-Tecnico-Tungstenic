@@ -16,7 +16,7 @@ Hecha para el challenge técnico de Tungstenic.
 ## Requisitos
 
 - Python 3.10 o superior y `pip install -r requirements.txt` (solo PyYAML)
-- [nuclei](https://github.com/projectdiscovery/nuclei) en el PATH
+- [nuclei](https://github.com/projectdiscovery/nuclei) v3 en el PATH (los templates son de tipo `file`, la herramienta ya pasa `-file` al ejecutarlo)
 - [jadx](https://github.com/skylot/jadx) y Java, solo si el input es un `.apk`
 
 Si los binarios no están en el PATH se pueden pasar con `--nuclei` y `--jadx`, o con las variables `NUCLEI_BIN` y `JADX_BIN`.
@@ -99,18 +99,7 @@ flowchart LR
     O --> J[JSON]
 ```
 
-Módulos de Python:
-
-| Archivo | Responsabilidad |
-|---|---|
-| `cli.py` | argumentos, flujo general y código de salida |
-| `registry.py` | descubre y valida los módulos |
-| `decompile.py` | invoca jadx |
-| `nuclei.py` | ejecuta nuclei y parsea su salida JSONL |
-| `evidence.py` | convierte lo que devuelve nuclei en archivo, línea y contexto |
-| `engine.py` | orquesta todo y decide el estado de cada módulo |
-| `manifest.py` | lee las activities del `AndroidManifest.xml` |
-| `reporters/` | salida en consola, Markdown y JSON |
+En el código, `cli.py` maneja los argumentos y el flujo, `registry.py` descubre los módulos, `decompile.py` llama a jadx, `nuclei.py` corre nuclei y parsea el JSONL, `evidence.py` ubica cada match en su archivo y línea, `engine.py` decide el estado de cada módulo y `reporters/` genera la salida.
 
 nuclei no informa la línea en que matcheó un template de archivos. Por eso cada template tiene un extractor que devuelve el texto exacto encontrado y `evidence.py` lo ubica en el archivo para calcular la línea.
 
@@ -160,7 +149,7 @@ Necesita `adb` en el PATH (o `--adb` / `ADB_BIN`). Sin `--install` la app tiene 
 python -m unittest discover -s tests -t .
 ```
 
-Los tests corren contra código de ejemplo en `tests/fixtures` y usan `tests/nuclei_sim.py`, un intérprete mínimo de los templates (matchers y extractors regex) que reemplaza al binario de nuclei. Sirve para probar el pipeline y las regex sin instalar nada, pero no reemplaza una corrida con nuclei real. La parte dinámica se prueba con un adb simulado y PNG generados en el test.
+Los tests corren contra código de ejemplo en `tests/fixtures` y usan `tests/nuclei_sim.py`, un intérprete mínimo de los templates (matchers y extractors regex) que reemplaza al binario de nuclei. Así los tests corren sin instalar nada; con nuclei 3.11 la salida es la misma en todos los fixtures. La parte dinámica se prueba con un adb simulado y PNG generados en el test.
 
 Además validé las regex a mano contra el código decompilado de los demos del MASTG (MASTG-DEMO-0017, 0022, 0023 y 0061) y detectan lo que cada demo documenta: las líneas 24, 26 y 30 en el de claves, los cuatro algoritmos en el de algoritmos rotos, las seis instancias en el de ECB y el `addFlags(8192)` en el de FLAG_SECURE. Esos archivos no están en el repo; se pueden bajar del repositorio del MASTG y correr con `python -m apkscan <directorio>`.
 
@@ -168,6 +157,4 @@ Además validé las regex a mano contra el código decompilado de los demos del 
 
 - Analiza código Java/Kotlin. Si el input es un directorio decompilado con apktool (smali), los templates actuales no aplican.
 - Es análisis estático por regex, sin flujo de datos. Las claves hardcodeadas se detectan por patrones conocidos: un arreglo de bytes literal o un string de largo típico de clave en el mismo archivo que una `SecretKeySpec`. Claves armadas en varios pasos o ofuscadas pueden pasar desapercibidas, y algún literal del mismo largo puede dar un falso positivo. Además, cuando un archivo tiene un arreglo de bytes literal, se reportan todas las `SecretKeySpec` de ese archivo, aunque alguna se construya con otra clave. Por eso cada reporte incluye una nota de validación manual.
-- nuclei limita por defecto el tamaño de los archivos que procesa. Si aparece un archivo decompilado muy grande sin analizar, hay que subir `max-size` en el bloque `file` del template.
-- Los templates y el parseo de la salida de nuclei se probaron con un simulador, no con el binario real. La primera corrida real es la que confirma que coinciden.
-- La prueba dinámica depende del formato de `dumpsys window`, que varía entre versiones de Android; se contemplan las flags con nombre (`SECURE`) y en hexadecimal. Solo cubre MASTG-TEST-0291.
+- nuclei limita por defecto el tamaño de los archivos que procesa. Si aparece un archivo decompilado muy grande sin analizar, hay que subir `max-size` en el bloque `file` del template.- La prueba dinámica depende del formato de `dumpsys window`, que varía entre versiones de Android; se contemplan las flags con nombre (`SECURE`) y en hexadecimal. Solo cubre MASTG-TEST-0291.

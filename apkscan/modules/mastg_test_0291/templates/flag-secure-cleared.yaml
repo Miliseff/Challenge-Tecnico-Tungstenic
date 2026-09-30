@@ -2,7 +2,7 @@ id: mastg-0291-flag-secure-cleared
 
 info:
   name: FLAG_SECURE removido de una ventana
-  author: apkscan
+  author: miliseff
   severity: medium
   description: Window.clearFlags con FLAG_SECURE (por nombre o por valor numerico) deshace la proteccion.
   tags: android,platform,mastg-test-0291,role-weakening

@@ -64,7 +64,7 @@ class NucleiRunner:
         cmd = [find_nuclei(self.binary)]
         for folder in template_dirs:
             cmd += ["-t", str(folder)]
-        cmd += ["-target", str(target), "-jsonl", "-silent", "-duc", "-nc"]
+        cmd += ["-target", str(target), "-file", "-jsonl", "-omit-template", "-silent", "-duc", "-nc"]
         return cmd
 
     def run(self, template_dirs: list[Path], target: Path) -> list[Hit]:

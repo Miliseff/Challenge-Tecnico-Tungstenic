@@ -2,7 +2,7 @@ id: mastg-0232-aes-default-mode
 
 info:
   name: Cipher.getInstance("AES") sin modo, usa ECB por defecto
-  author: apkscan
+  author: miliseff
   severity: high
   description: Cuando no se indica el modo, AES se inicializa en ECB.
   tags: android,crypto,mastg-test-0232

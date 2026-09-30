@@ -2,7 +2,7 @@ id: mastg-0232-ecb-explicit
 
 info:
   name: Transformacion con modo ECB explicito
-  author: apkscan
+  author: miliseff
   severity: high
   description: Cipher.getInstance con una transformacion simetrica Algoritmo/ECB/Padding. RSA queda excluido.
   tags: android,crypto,mastg-test-0232

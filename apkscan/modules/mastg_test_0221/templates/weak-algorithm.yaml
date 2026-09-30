@@ -2,7 +2,7 @@ id: mastg-0221-weak-algorithm
 
 info:
   name: Algoritmo simetrico roto en Cipher, KeyGenerator o SecretKeyFactory
-  author: apkscan
+  author: miliseff
   severity: high
   description: Busca getInstance con DES, DESede, RC2, RC4, Blowfish o variantes PBE basadas en ellos.
   tags: android,crypto,mastg-test-0221
