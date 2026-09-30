@@ -2,6 +2,8 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .paths import walk_files
+
 ANDROID_NAME = "{http://schemas.android.com/apk/res/android}name"
 
 
@@ -13,7 +15,13 @@ class ManifestInfo:
 
 
 def find_manifest(root: Path) -> Path | None:
-    candidates = sorted(root.rglob("AndroidManifest.xml"), key=lambda p: len(p.parts))
+    direct = root / "resources" / "AndroidManifest.xml"
+    if direct.is_file():
+        return direct
+    candidates = sorted(
+        (p for p in walk_files(root) if p.name == "AndroidManifest.xml"),
+        key=lambda p: len(p.parts),
+    )
     return candidates[0] if candidates else None
 
 

@@ -1,14 +1,15 @@
 from datetime import datetime
 from pathlib import Path
 
-from .evidence import SourceCache, locate
+from .evidence import SourceCache, display_path, locate
 from .manifest import read_manifest
 from .models import AbsenceProof, Evidence, ModuleResult, ModuleSpec, Report, Status
+from .paths import walk_files
 
 
 def count_sources(root: Path, extensions: set[str]) -> int:
     wanted = {"." + e.lstrip(".").lower() for e in extensions}
-    return sum(1 for p in root.rglob("*") if p.is_file() and p.suffix.lower() in wanted)
+    return sum(1 for p in walk_files(root) if p.suffix.lower() in wanted)
 
 
 def sort_key(ev: Evidence):
@@ -24,7 +25,7 @@ def build_absence_proof(module: ModuleSpec, root: Path) -> AbsenceProof:
         patterns=patterns,
         files_scanned=count_sources(root, extensions),
         components=manifest.activities if manifest else [],
-        manifest=manifest.path.relative_to(root).as_posix() if manifest else None,
+        manifest=display_path(manifest.path, root) if manifest else None,
     )
 
 

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from .models import Evidence, Hit, TemplateInfo
+from .paths import native
 
 CONTEXT_LINES = 2
 
@@ -12,7 +13,8 @@ class SourceCache:
     def text(self, path: Path) -> str | None:
         if path not in self._texts:
             try:
-                raw = path.read_text(encoding="utf-8", errors="replace")
+                with open(native(path), encoding="utf-8", errors="replace") as fh:
+                    raw = fh.read()
             except OSError:
                 raw = None
             self._texts[path] = raw.replace("\r\n", "\n") if raw is not None else None

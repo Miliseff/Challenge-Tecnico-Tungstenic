@@ -151,7 +151,18 @@ python -m unittest discover -s tests -t .
 
 Los tests corren contra código de ejemplo en `tests/fixtures` y usan `tests/nuclei_sim.py`, un intérprete mínimo de los templates (matchers y extractors regex) que reemplaza al binario de nuclei. Así los tests corren sin instalar nada; con nuclei 3.11 la salida es la misma en todos los fixtures. La parte dinámica se prueba con un adb simulado y PNG generados en el test.
 
-Además validé las regex a mano contra el código decompilado de los demos del MASTG (MASTG-DEMO-0017, 0022, 0023 y 0061) y detectan lo que cada demo documenta: las líneas 24, 26 y 30 en el de claves, los cuatro algoritmos en el de algoritmos rotos, las seis instancias en el de ECB y el `addFlags(8192)` en el de FLAG_SECURE. Esos archivos no están en el repo; se pueden bajar del repositorio del MASTG y correr con `python -m apkscan <directorio>`.
+## Resultados con los APK de demo del MASTG
+
+Lo corrí contra los APK de MASTG-DEMO-0017, 0022, 0023 y 0061 (jadx 1.5.6 + nuclei 3.11.1). Cada APK trae la app de prueba completa, unos 7.850 archivos Java entre androidx y kotlin, y los hallazgos caen todos en `MastgTest.java`, sin falsos positivos en las librerías:
+
+| APK | 0212 | 0221 | 0232 | 0291 |
+|---|---|---|---|---|
+| DEMO-0017 (clave hardcodeada) | VULNERABLE, el arreglo de bytes y las dos `SecretKeySpec` | - | - | VULNERABLE (ausencia) |
+| DEMO-0022 (algoritmos rotos) | - | VULNERABLE, DES, 3DES, RC4, Blowfish | - | VULNERABLE (ausencia) |
+| DEMO-0023 (modos ECB) | VULNERABLE, claves fijas | VULNERABLE, DES y 3DES | VULNERABLE, las 6 transformaciones | VULNERABLE (ausencia) |
+| DEMO-0061 (FLAG_SECURE) | - | - | - | PROTEGIDO, `addFlags(8192)` |
+
+Las coincidencias extra de DEMO-0023 son correctas: ese demo usa claves literales como `"1234567890123456"` y también cifra con DES y 3DES. Los reportes completos están en [examples/](examples/).
 
 ## Limitaciones
 

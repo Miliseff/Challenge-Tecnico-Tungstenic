@@ -3,6 +3,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from .paths import native
+
 
 class DecompileError(Exception):
     pass
@@ -27,7 +29,7 @@ def decompile(apk: Path, workdir: Path, jadx: str | None = None, force: bool = F
         return out
     binary = find_jadx(jadx)
     if out.exists():
-        shutil.rmtree(out)
+        shutil.rmtree(native(out))
     out.mkdir(parents=True)
     proc = subprocess.run(
         [binary, "-d", str(out), str(apk)],
