@@ -1,8 +1,6 @@
-# apkscan
+# Challenge Técnico de Tungstenic 
 
-Herramienta de línea de comandos que analiza un APK (o el código ya decompilado) y busca evidencia de vulnerabilidades del OWASP MASTG. La detección la hacen templates de nuclei y Python se ocupa de orquestar, ubicar la evidencia y armar el reporte.
-
-Hecha para el challenge técnico de Tungstenic.
+Herramienta de línea de comandos que analiza un APK y busca evidencia de vulnerabilidades del OWASP MASTG. La detección la hacen templates de nuclei y Python se ocupa de orquestar, ubicar la evidencia y armar el reporte.
 
 ## Qué detecta
 
@@ -32,7 +30,8 @@ python -m apkscan app.apk --skip 0291
 python -m apkscan --list-modules
 ```
 
-Si el input es un `.apk`, se decompila con jadx en `.apkscan-work/<nombre>` y se reutiliza en las corridas siguientes (`--force` para volver a decompilar). Si es un directorio, se analiza tal cual; espera la estructura de jadx (`sources/` y `resources/AndroidManifest.xml`).
+Si el input es un `.apk`, se decompila con jadx en `.apkscan-work/<nombre>` y se reutiliza en las ejecuciones siguientes (`--force` para volver a decompilar). 
+Si es un directorio, se analiza como está, espera la estructura de jadx (`sources/` y `resources/AndroidManifest.xml`).
 
 El código de salida es `1` si algún test resulta vulnerable, `0` si no y `2` ante un error de ejecución, así que se puede usar en un pipeline.
 
@@ -54,16 +53,14 @@ Evidencias (6):
           16 |         Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
 ```
 
-La salida de consola se puede complementar con un reporte en Markdown (`--md`) o JSON (`--json`).
+## El caso de MASWE-0038
 
-## El caso de MASWE-0038: la evidencia es que no hay evidencia
+Para FLAG_SECURE el test falla cuando la API **no aparece**. El módulo declara `mode: absence` y el reporte demuestra la ausencia con datos verificables:
 
-Para FLAG_SECURE el test falla cuando la API **no aparece**. Un "0 resultados" a secas no le sirve a nadie, así que el módulo declara `mode: absence` y el reporte demuestra la ausencia con datos verificables:
-
-- los patrones exactos que se buscaron,
-- cuántos archivos de código se analizaron,
-- las activities declaradas en el `AndroidManifest.xml`, que son la superficie que queda sin protección,
-- el resultado: 0 coincidencias.
+- los patrones exactos que se buscaron
+- cuántos archivos de código se analizaron
+- las activities declaradas en el `AndroidManifest.xml`, que son las que quedan sin protección
+- el resultado: 0 coincidencias
 
 Los estados posibles en un módulo de ausencia son:
 
@@ -101,11 +98,12 @@ flowchart LR
 
 En el código, `cli.py` maneja los argumentos y el flujo, `registry.py` descubre los módulos, `decompile.py` llama a jadx, `nuclei.py` corre nuclei y parsea el JSONL, `evidence.py` ubica cada match en su archivo y línea, `engine.py` decide el estado de cada módulo y `reporters/` genera la salida.
 
-nuclei no informa la línea en que matcheó un template de archivos. Por eso cada template tiene un extractor que devuelve el texto exacto encontrado y `evidence.py` lo ubica en el archivo para calcular la línea.
+Nuclei no informa la línea en que matcheó un template de archivos. 
+Por eso cada template tiene un extractor que devuelve el texto exacto encontrado y `evidence.py` lo ubica en el archivo para calcular la línea.
 
 ## Cómo agregar o quitar detecciones
 
-Cada test es una carpeta en `apkscan/modules/`. El núcleo no conoce ningún módulo en particular: los descubre al iniciar.
+Cada test es una carpeta en `apkscan/modules/`
 
 ```
 modules/mastg_test_0221/
@@ -115,16 +113,20 @@ modules/mastg_test_0221/
     des-keyspec.yaml
 ```
 
-- **Agregar** un test: crear una carpeta con un `module.yaml` y al menos un template. No hay que tocar código Python. También se pueden cargar módulos externos con `--modules-dir`.
+- **Agregar** un test: crear una carpeta con un `module.yaml` y al menos un template.
+ No hay que tocar código Python. También se pueden cargar módulos externos con `--modules-dir`
+
 - **Quitar** un test: borrar la carpeta, poner `enabled: false` en su `module.yaml`, o excluirlo en una corrida con `--skip`.
+
 - **Mejorar** una detección: editar el template de nuclei.
-- **Rol de cada template**, según el tag de nuclei: sin tag es un indicador de uso inseguro; `role-protection` marca evidencia de que la protección existe; `role-weakening` marca código que la quita. Los dos últimos son los que permiten modelar tests de ausencia.
+
+- **Rol de cada template**, según el tag de nuclei: sin tag es un indicador de uso inseguro; `role-protection` marca evidencia de que la protección existe, `role-weakening` marca código que la quita. Los dos últimos son los que permiten modelar tests de ausencia.
 
 El registro valida los módulos al cargarlos y falla con un mensaje claro si falta un campo, si un id de template está repetido o si un módulo de ausencia no tiene templates de protección.
 
 Hay más diagramas (flujo de una corrida, estructura de un módulo, decisión de estados y prueba dinámica) en [docs/arquitectura.md](docs/arquitectura.md).
 
-## Prueba dinámica (opcional)
+## Prueba dinámica 
 
 Solo MASTG-TEST-0291 admite verificación en runtime, los otros tres tests del alcance son estáticos. Con un emulador (Android Studio o Genymotion) o un dispositivo físico conectado por adb:
 
@@ -135,13 +137,16 @@ python -m apkscan app.apk --dynamic --serial emulator-5554 --settle 3
 
 Para cada activity del manifest la herramienta:
 
-1. la abre con `am start -W`,
-2. lee con `dumpsys window` las flags de la ventana que tiene el foco y busca `FLAG_SECURE`,
-3. toma una captura con `screencap` y decodifica el PNG para ver si quedó en negro, que es lo que hace Android cuando la ventana es segura.
+1. la abre con `am start -W`
+2. lee con `dumpsys window` las flags de la ventana que tiene el foco y busca `FLAG_SECURE`
+3. toma una captura con `screencap` y decodifica el PNG para ver si quedó en negro, que es lo que hace Android cuando la ventana es segura
 
-Cada activity queda como `protegida`, `SIN proteccion` u `omitida`. Se omiten las que no se pueden abrir desde adb, por ejemplo las no exportadas en un dispositivo sin root, y las que no llegan a tomar el foco. Si el resultado dinámico contradice al estático, el estado pasa a `REVISAR` y el reporte explica por qué.
+Cada activity queda como `protegida`, `SIN proteccion` u `omitida`.
+Se omiten las que no se pueden abrir desde adb, por ejemplo las no exportadas en un dispositivo sin root, y las que no llegan a tomar el foco. 
+Si el resultado dinámico contradice al estático, el estado pasa a `REVISAR` y el reporte explica por qué.
 
-Necesita `adb` en el PATH (o `--adb` / `ADB_BIN`). Sin `--install` la app tiene que estar ya instalada en el dispositivo.
+Necesita `adb` en el PATH (o `--adb` / `ADB_BIN`). 
+Sin `--install` la app tiene que estar ya instalada en el dispositivo.
 
 ## Tests
 
@@ -149,11 +154,12 @@ Necesita `adb` en el PATH (o `--adb` / `ADB_BIN`). Sin `--install` la app tiene 
 python -m unittest discover -s tests -t .
 ```
 
-Los tests corren contra código de ejemplo en `tests/fixtures` y usan `tests/nuclei_sim.py`, un intérprete mínimo de los templates (matchers y extractors regex) que reemplaza al binario de nuclei. Así los tests corren sin instalar nada; con nuclei 3.11 la salida es la misma en todos los fixtures. La parte dinámica se prueba con un adb simulado y PNG generados en el test.
+Los tests corren contra código de ejemplo en `tests/fixtures` y usan `tests/nuclei_sim.py`, un intérprete mínimo de los templates que reemplaza al binario de nuclei.
+Los tests corren sin instalar nada, con nuclei 3.11 la salida es la misma en todos los fixtures. La parte dinámica se prueba con un adb simulado y PNG generados en el test.
 
 ## Resultados con los APK de demo del MASTG
 
-Lo corrí contra los APK de MASTG-DEMO-0017, 0022, 0023 y 0061 (jadx 1.5.6 + nuclei 3.11.1). Cada APK trae la app de prueba completa, unos 7.850 archivos Java entre androidx y kotlin, y los hallazgos caen todos en `MastgTest.java`, sin falsos positivos en las librerías:
+Están ejecutados contra los APK de MASTG-DEMO-0017, 0022, 0023 y 0061. Cada APK trae la app de prueba completa, unos 7.850 archivos Java entre androidx y kotlin, y los hallazgos caen todos en `MastgTest.java`, sin falsos positivos en las librerías.
 
 | APK | 0212 | 0221 | 0232 | 0291 |
 |---|---|---|---|---|
@@ -162,7 +168,8 @@ Lo corrí contra los APK de MASTG-DEMO-0017, 0022, 0023 y 0061 (jadx 1.5.6 + nuc
 | DEMO-0023 (modos ECB) | VULNERABLE, claves fijas | VULNERABLE, DES y 3DES | VULNERABLE, las 6 transformaciones | VULNERABLE (ausencia) |
 | DEMO-0061 (FLAG_SECURE) | - | - | - | PROTEGIDO, `addFlags(8192)` |
 
-Las coincidencias extra de DEMO-0023 son correctas: ese demo usa claves literales como `"1234567890123456"` y también cifra con DES y 3DES. Los reportes completos están en [examples/](examples/).
+Las coincidencias extra de DEMO-0023 son correctas, ese demo usa claves literales como `"1234567890123456"` y también cifra con DES y 3DES. 
+Los reportes completos están en [examples/](examples/)
 
 ## Limitaciones
 
