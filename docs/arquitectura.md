@@ -1,8 +1,8 @@
 # Diagramas
 
-Los diagramas están en Mermaid, GitHub los renderiza directamente.
+Los diagramas están en Mermaid
 
-## Flujo de una corrida
+## Flujo de una ejecucion
 
 ```mermaid
 sequenceDiagram
@@ -49,7 +49,8 @@ flowchart TB
     tpl -->|-t| N[nuclei]
 ```
 
-El motor no tiene referencias a ningún test concreto. Todo lo que cambia entre un test y otro vive en la carpeta del módulo.
+El motor no tiene referencias a ningún test concreto. 
+Todo lo que cambia entre un test y otro vive en la carpeta del módulo.
 
 ## Cómo se decide el estado
 
