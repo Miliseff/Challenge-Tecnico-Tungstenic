@@ -19,7 +19,17 @@ Herramienta de línea de comandos que analiza un APK y busca evidencia de vulner
 
 Si los binarios no están en el PATH se pueden pasar con `--nuclei` y `--jadx`, o con las variables `NUCLEI_BIN` y `JADX_BIN`.
 
+## Instalación
+
+```bash
+git clone https://github.com/Miliseff/Challenge-Tecnico-Tungstenic.git
+cd Challenge-Tecnico-Tungstenic
+pip install -r requirements.txt
+```
+
 ## Uso
+
+Desde la carpeta del repo:
 
 ```bash
 python -m apkscan app.apk
@@ -29,6 +39,8 @@ python -m apkscan app.apk --only 0221,0232
 python -m apkscan app.apk --skip 0291
 python -m apkscan --list-modules
 ```
+
+El reporte siempre se muestra en consola. Con `--md` además se guarda en un archivo Markdown y con `--json` en JSON, en la misma ejecución. Se pueden usar los dos juntos, como en el segundo ejemplo.
 
 Si el input es un `.apk`, se decompila con jadx en `.apkscan-work/<nombre>` y se reutiliza en las ejecuciones siguientes (`--force` para volver a decompilar). 
 Si es un directorio, se analiza como está, espera la estructura de jadx (`sources/` y `resources/AndroidManifest.xml`).
